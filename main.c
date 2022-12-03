@@ -4,7 +4,7 @@
 #define MAX_JUNCS 10
 #define MAX_ROADS 10
 #define NUM_JUNCS 5
-#define NUM_VEHICLES 3
+#define NUM_VEHICLES 5
 typedef struct road {
     int to;
     int dis;
@@ -15,7 +15,7 @@ typedef struct node {
     int id;
     int explored;
     road* roads[MAX_ROADS];
-    int* prev;
+    int prev;
     int shortestDis;
     int currDis;
 }node;
@@ -37,9 +37,6 @@ short int  main(void) {
             output[i][j] = -1;
         }
     }
-    for (int i = 0; i < MAX_JUNCS; i++) {
-        printf("%d ", nodes[i].id);
-    }
     printf("\n");
     prepareRoutes(output);
     printf("\n");
@@ -48,13 +45,15 @@ short int  main(void) {
 void prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]) {
     int remainingVehicles = NUM_VEHICLES;
     int currentNode = startNode;
-    //initial current distance being set to infinity
+    //initial shortest distance being set to infinity
     for (int i = 0; i < NUM_JUNCS; i++) {
         nodes[i].shortestDis = INT_MAX;
     }
+
     //starting main loop
     // exit when either all vehicles have passed or road has been blocked.
     while (remainingVehicles) {
+        printf("remaining Vehicles are : %d \n", remainingVehicles);
         short int laneFound = 0;
         nodes[startNode].explored = 1;
         nodes[startNode].prev = nodes[startNode].id;
@@ -62,11 +61,17 @@ void prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]) {
         nodes[startNode].currDis = 0;
 
         while (currentNode != endNode) {
+            printf("currentNode : %d \n", currentNode);
+            laneFound = 0;
             for (int i = 0; i < MAX_ROADS; i++) {
                 if (nodes[currentNode].roads[i] == NULL) break;
                 road currentRoad = *(nodes[currentNode].roads[i]);
+                printf("%d %d %d \n", currentRoad.to, currentRoad.dis, currentRoad.capacity);
+                //printf("%d !\n", nodes[currentRoad.to].explored);
                 if (!nodes[currentRoad.to].explored && (currentRoad.capacity > 0)) {
                     nodes[currentRoad.to].currDis = nodes[currentNode].shortestDis + currentRoad.dis;
+                    //printf("currDis of current to: %d \n", nodes[currentRoad.to].currDis);
+                    //printf("shortest Distance of current to: %d \n", nodes[currentRoad.to].shortestDis);
                     laneFound = 1;
                     if (nodes[currentRoad.to].currDis < nodes[currentRoad.to].shortestDis) {
                         nodes[currentRoad.to].shortestDis = nodes[currentRoad.to].currDis;
@@ -74,28 +79,39 @@ void prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]) {
                     }
                 }
             }
-            if (!laneFound) goto laneNotFound;
+            for (int i = 0; i < NUM_JUNCS; i++) {
+                printf("%d ", nodes[i].shortestDis);
+            }
+            printf("\n LaneFound : %d \n", laneFound);
+            if (!laneFound) {
+                printf("Here in the ocean");
+            };
             int nearestNode;
-            
             for (int i = 0; i < MAX_ROADS; i++) {
                 if (nodes[currentNode].roads[i] == NULL) break;
                 road currentRoad = *(nodes[currentNode].roads[i]);
-                //setting first unexplored node to be nearest
                 if (!nodes[currentRoad.to].explored) nearestNode = nodes[currentRoad.to].id;
                 else continue;
+            }
 
-                if (!nodes[currentRoad.to].explored && (!nodes[currentRoad.to].shortestDis < nodes[nearestNode].shortestDis)) {
+            for (int i = 0; i < MAX_ROADS; i++) {
+                if (nodes[currentNode].roads[i] == NULL) break;
+                road currentRoad = *(nodes[currentNode].roads[i]);
+                //printf("The nearestNode's shortest is %d \n", nodes[nearestNode].shortestDis);
+                //printf("The Current Road's shortest is %d \n", nodes[currentRoad.to].shortestDis);
+                if (!nodes[currentRoad.to].explored && (nodes[currentRoad.to].shortestDis < nodes[nearestNode].shortestDis)) {
                     nearestNode = nodes[currentRoad.to].id;
                 }
             }
-
+            printf("Broke \n");
             nodes[nearestNode].explored = 1;
             currentNode = nearestNode;
         }
 
         //traverse back to start
-        while (currentNode != startNode) {
-            int juncNum = 0;
+        int juncNum = 0;
+        while (1) {
+            
             for (int i = 0; i < MAX_ROADS; i++) {
                 //if (nodes[currentNode].roads[i] == NULL) break;
                 if (nodes[currentNode].roads[i]->to == nodes[currentNode].prev) {
@@ -115,6 +131,10 @@ void prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]) {
             arr[NUM_VEHICLES - remainingVehicles][juncNum] = currentNode;
             currentNode = nodes[currentNode].prev;
             ++juncNum;
+            if (currentNode == startNode) {
+                arr[NUM_VEHICLES - remainingVehicles][juncNum] = currentNode;
+                break;
+            };
         }
         remainingVehicles -= 1;
         currentNode = startNode;
