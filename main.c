@@ -4,7 +4,7 @@
 #define MAX_JUNCS 10
 #define MAX_ROADS 10
 #define NUM_JUNCS 5
-#define NUM_VEHICLES 5
+#define NUM_VEHICLES 3
 typedef struct road {
     int to;
     int dis;
@@ -31,14 +31,18 @@ void printOutput(int arr[NUM_VEHICLES][MAX_ROADS]);
 short int  main(void) {
     //Creating our graph
     initialzeGraph();
-    int numVehicles = 5;
     int output[NUM_VEHICLES][MAX_ROADS];
     for (int i = 0; i < NUM_VEHICLES; i++) {
         for (int j = 0; j < MAX_ROADS; j++) {
             output[i][j] = -1;
         }
     }
-
+    for (int i = 0; i < MAX_JUNCS; i++) {
+        printf("%d ", nodes[i].id);
+    }
+    printf("\n");
+    prepareRoutes(output);
+    printf("\n");
     printOutput(output);
 }
 void prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]) {
@@ -87,16 +91,43 @@ void prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]) {
 
             nodes[nearestNode].explored = 1;
             currentNode = nearestNode;
+        }
 
-            if (currentNode == endNode) {
-
+        //traverse back to start
+        while (currentNode != startNode) {
+            int juncNum = 0;
+            for (int i = 0; i < MAX_ROADS; i++) {
+                //if (nodes[currentNode].roads[i] == NULL) break;
+                if (nodes[currentNode].roads[i]->to == nodes[currentNode].prev) {
+                    nodes[currentNode].roads[i]->capacity -= 1;
+                    break;
+                }
             }
+            int prev = nodes[currentNode].prev;
+            for (int i = 0; i < MAX_ROADS; i++) {
+                if (nodes[prev].roads[i]->to == currentNode) {
+                    nodes[prev].roads[i]->capacity -= 1;
+                    break;
+                }
+            }
+
+            //registering the path
+            arr[NUM_VEHICLES - remainingVehicles][juncNum] = currentNode;
+            currentNode = nodes[currentNode].prev;
+            ++juncNum;
+        }
+        remainingVehicles -= 1;
+        currentNode = startNode;
+        for (int i = 0; i < MAX_JUNCS; i++) {
+            nodes[i].explored = 0;
+            nodes[i].currDis = INT_MAX;
+            nodes[i].shortestDis = INT_MAX;
         }
 
     }
 
         laneNotFound:
-            printf("Lane not found");
+            printf("Lane not found \n");
             return 0;
 }
 void printOutput(int arr[NUM_VEHICLES][MAX_ROADS]) {
