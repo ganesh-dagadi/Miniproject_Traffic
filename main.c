@@ -4,7 +4,7 @@
 #define MAX_JUNCS 10
 #define MAX_ROADS 10
 #define NUM_JUNCS 5
-#define NUM_VEHICLES 5
+#define NUM_VEHICLES 8
 typedef struct road {
     int to;
     int dis;
@@ -25,7 +25,7 @@ int endNode = 4;
 void initialzeGraph();
 void addRoad(int nodeId, int to, int dis, int capacity);
 void displayRoads(int nodeId);
-void prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]);
+short int prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]);
 void printOutput(int arr[NUM_VEHICLES][MAX_ROADS]);
 
 short int  main(void) {
@@ -42,7 +42,7 @@ short int  main(void) {
     printf("\n");
     printOutput(output);
 }
-void prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]) {
+short int prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]) {
     int remainingVehicles = NUM_VEHICLES;
     int currentNode = startNode;
     //initial shortest distance being set to infinity
@@ -53,7 +53,7 @@ void prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]) {
     //starting main loop
     // exit when either all vehicles have passed or road has been blocked.
     while (remainingVehicles) {
-        printf("remaining Vehicles are : %d \n", remainingVehicles);
+        //printf("remaining Vehicles are : %d \n", remainingVehicles);
         short int laneFound = 0;
         nodes[startNode].explored = 1;
         nodes[startNode].prev = nodes[startNode].id;
@@ -61,12 +61,12 @@ void prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]) {
         nodes[startNode].currDis = 0;
 
         while (currentNode != endNode) {
-            printf("currentNode : %d \n", currentNode);
+            //printf("currentNode : %d \n", currentNode);
             laneFound = 0;
             for (int i = 0; i < MAX_ROADS; i++) {
                 if (nodes[currentNode].roads[i] == NULL) break;
                 road currentRoad = *(nodes[currentNode].roads[i]);
-                printf("%d %d %d \n", currentRoad.to, currentRoad.dis, currentRoad.capacity);
+                //printf("%d %d %d \n", currentRoad.to, currentRoad.dis, currentRoad.capacity);
                 //printf("%d !\n", nodes[currentRoad.to].explored);
                 if (!nodes[currentRoad.to].explored && (currentRoad.capacity > 0)) {
                     nodes[currentRoad.to].currDis = nodes[currentNode].shortestDis + currentRoad.dis;
@@ -79,12 +79,12 @@ void prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]) {
                     }
                 }
             }
-            for (int i = 0; i < NUM_JUNCS; i++) {
-                printf("%d ", nodes[i].shortestDis);
-            }
-            printf("\n LaneFound : %d \n", laneFound);
+            //for (int i = 0; i < NUM_JUNCS; i++) {
+             //   printf("%d ", nodes[i].shortestDis);
+            //}
+            //printf("\n LaneFound : %d \n", laneFound);
             if (!laneFound) {
-                printf("Here in the ocean");
+                goto laneNotFound;
             };
             int nearestNode;
             for (int i = 0; i < MAX_ROADS; i++) {
@@ -103,7 +103,7 @@ void prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]) {
                     nearestNode = nodes[currentRoad.to].id;
                 }
             }
-            printf("Broke \n");
+            //printf("Broke \n");
             nodes[nearestNode].explored = 1;
             currentNode = nearestNode;
         }
@@ -145,7 +145,8 @@ void prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]) {
         }
 
     }
-
+        
+    return 1;
         laneNotFound:
             printf("Lane not found \n");
             return 0;
@@ -173,18 +174,18 @@ void initialzeGraph() {
     //creating our roads.
     //A=0 B=1 C=2 D=3 E=4
 
-    addRoad(0, 1, 3, 2);
+    addRoad(0, 1, 3, 3);
     addRoad(0, 2, 5, 3);
-    addRoad(1, 0, 3, 2);
+    addRoad(1, 0, 3, 3);
     addRoad(1, 2, 5, 1);
-    addRoad(1, 4, 2, 1);
+    addRoad(1, 4, 2, 3);
     addRoad(2, 0, 5, 3);
     addRoad(2, 1, 5, 1);
     addRoad(2, 3, 4, 3);
     addRoad(3, 2, 4, 3);
-    addRoad(3, 4, 3, 2);
-    addRoad(4, 3, 3, 2);
-    addRoad(4, 1, 2, 1);
+    addRoad(3, 4, 3, 3);
+    addRoad(4, 3, 3, 3);
+    addRoad(4, 1, 2, 3);
 }
 
 void addRoad(int nodeId, int to, int dis, int capacity) {
