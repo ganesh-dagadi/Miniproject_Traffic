@@ -4,7 +4,7 @@
 #define MAX_JUNCS 10
 #define MAX_ROADS 10
 #define NUM_JUNCS 5
-#define NUM_VEHICLES 8
+#define NUM_VEHICLES 3
 typedef struct road {
     int to;
     int dis;
@@ -38,8 +38,13 @@ short int  main(void) {
         }
     }
     printf("\n");
-    prepareRoutes(output);
-    printf("\n");
+    if (prepareRoutes(output)) {
+        printf("\nLane Found \n");
+
+    }
+    else {
+        printf("\n Lane not found \n");
+    }
     printOutput(output);
 }
 short int prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]) {
@@ -148,7 +153,17 @@ short int prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]) {
         
     return 1;
         laneNotFound:
-            printf("Lane not found \n");
+            printf("");
+            int juncNum = 0;
+            while (1) {
+                arr[NUM_VEHICLES - remainingVehicles][juncNum] = currentNode;
+                currentNode = nodes[currentNode].prev;
+                ++juncNum;
+                if (currentNode == startNode) {
+                    arr[NUM_VEHICLES - remainingVehicles][juncNum] = currentNode;
+                    break;
+                }
+            }
             return 0;
 }
 void printOutput(int arr[NUM_VEHICLES][MAX_ROADS]) {
@@ -174,18 +189,18 @@ void initialzeGraph() {
     //creating our roads.
     //A=0 B=1 C=2 D=3 E=4
 
-    addRoad(0, 1, 3, 3);
+    addRoad(0, 1, 3, 2);
     addRoad(0, 2, 5, 3);
-    addRoad(1, 0, 3, 3);
+    addRoad(1, 0, 3, 2);
     addRoad(1, 2, 5, 1);
-    addRoad(1, 4, 2, 3);
+    addRoad(1, 4, 2, 1);
     addRoad(2, 0, 5, 3);
     addRoad(2, 1, 5, 1);
     addRoad(2, 3, 4, 3);
     addRoad(3, 2, 4, 3);
-    addRoad(3, 4, 3, 3);
-    addRoad(4, 3, 3, 3);
-    addRoad(4, 1, 2, 3);
+    addRoad(3, 4, 3, 2);
+    addRoad(4, 3, 3, 2);
+    addRoad(4, 1, 2, 1);
 }
 
 void addRoad(int nodeId, int to, int dis, int capacity) {
