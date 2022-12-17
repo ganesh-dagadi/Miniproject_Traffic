@@ -4,11 +4,11 @@
 
 #define MAX_JUNCS 10
 #define MAX_ROADS 10
-#define NUM_JUNCS 5
+#define NUM_JUNCS 10
 #define NUM_VEHICLES 5
 
-int sourceNode = 2;
-int destNode = 0;
+int sourceNode = 0;
+int destNode = 5;
 
 typedef struct road {
     int to;
@@ -21,8 +21,8 @@ typedef struct node {
     int explored;
     road* roads[MAX_ROADS];
     int prev;
-    int shortestDis;
-    int currDis;
+    float shortestDis;
+    float currDis;
     int x;
     int y;
 }node;
@@ -155,19 +155,23 @@ int generatePaths(int arr[NUM_VEHICLES][MAX_ROADS]) {
 
     //starting main loop
     // exit when either all vehicles have passed or road has been blocked.
-   
+    
     while (remainingVehicles) {
+        printf("remaining Vehicles are : %d \n", remainingVehicles);
         short int laneFound = 0;
         nodes[sourceNode].explored = 1;
         nodes[sourceNode].prev = nodes[sourceNode].id;
         nodes[sourceNode].shortestDis = 0;
         nodes[sourceNode].currDis = 0;
-
+        
         while (currentNode != destNode) {
+            printf("currentNode : %d \n", currentNode);
             laneFound = 0;
             for (int i = 0; i < MAX_ROADS; i++) {
-                if (nodes[currentNode].roads[i] == NULL) break;
+                if (nodes[currentNode].roads[i] == NULL) continue;
                 road currentRoad = *(nodes[currentNode].roads[i]);
+                printf("%d %f %d \n", currentRoad.to, currentRoad.dis, currentRoad.capacity);
+                printf("%d !\n", nodes[currentRoad.to].explored);
                 if (!nodes[currentRoad.to].explored && (currentRoad.capacity > 0)) {
                     nodes[currentRoad.to].currDis = nodes[currentNode].shortestDis + currentRoad.dis;
                     laneFound = 1;
@@ -177,32 +181,40 @@ int generatePaths(int arr[NUM_VEHICLES][MAX_ROADS]) {
                     }
                 }
             }
+            for (int i = 0; i < NUM_JUNCS; i++) {
+                printf("%f ", nodes[i].shortestDis);
+            }
+            printf("\n LaneFound : %d \n", laneFound);
             if (!laneFound) {
                 goto laneNotFound;
             };
-            int nearestNode;
+            int nearestNode = 0;
             for (int i = 0; i < MAX_ROADS; i++) {
-                if (nodes[currentNode].roads[i] == NULL) break;
+                if (nodes[currentNode].roads[i] == NULL) continue;
                 road currentRoad = *(nodes[currentNode].roads[i]);
+                //printf("The nearestNode's shortest is %f \n", nodes[nearestNode].shortestDis);
+                //printf("The Current Road's shortest is %f \n", nodes[currentRoad.to].shortestDis);
                 if (!nodes[currentRoad.to].explored) nearestNode = nodes[currentRoad.to].id;
                 else continue;
             }
-
+            
             for (int i = 0; i < MAX_ROADS; i++) {
-                if (nodes[currentNode].roads[i] == NULL) break;
+                if (nodes[currentNode].roads[i] == NULL) continue;
                 road currentRoad = *(nodes[currentNode].roads[i]);
                 if (!nodes[currentRoad.to].explored && (nodes[currentRoad.to].shortestDis < nodes[nearestNode].shortestDis)) {
                     nearestNode = nodes[currentRoad.to].id;
                 }
             }
+            printf("The nearestNode's shortest is %f \n", nodes[nearestNode].shortestDis);
+            printf("Broke \n");
             nodes[nearestNode].explored = 1;
             currentNode = nearestNode;
         }
-
+        
         //traverse back to start
         int juncNum = 0;
         while (1) {
-
+            
             for (int i = 0; i < MAX_ROADS; i++) {
                 if (nodes[currentNode].roads[i]->to == nodes[currentNode].prev) {
                     nodes[currentNode].roads[i]->capacity -= 1;
@@ -211,6 +223,7 @@ int generatePaths(int arr[NUM_VEHICLES][MAX_ROADS]) {
             }
             int prev = nodes[currentNode].prev;
             for (int i = 0; i < MAX_ROADS; i++) {
+                printf("%d", nodes[prev].id);
                 if (nodes[prev].roads[i]->to == currentNode) {
                     nodes[prev].roads[i]->capacity -= 1;
                     break;
@@ -233,7 +246,7 @@ int generatePaths(int arr[NUM_VEHICLES][MAX_ROADS]) {
             nodes[i].currDis = INT_MAX;
             nodes[i].shortestDis = INT_MAX;
         }
-
+        
     }
 
     return 1;
@@ -268,13 +281,14 @@ int** generateRoutesOutput(int arr[NUM_VEHICLES][MAX_ROADS]) {
             arr[i][j] = -1;
         }
     }
+    
     if (generatePaths(arr)) {
         printf("\nLane Found \n");
     }
     else {
         printf("\n Lane not found \n");
     }
-    printRouteOutput(arr);
+    //printRouteOutput(arr);
     return arr;
 }
 

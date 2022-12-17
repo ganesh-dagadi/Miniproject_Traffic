@@ -2,24 +2,20 @@
 #include <stdio.h>
 int main() {
 	initializeNodes();
-	createNode(5 , 8);
-	createNode(7, 6);
-	createNode(8, 2);
-	createNode(5, 4);
-	//createNode(2, 2);
-	createNode(2, 6);
-	//createNode(5, 4);
-	addRoads(0, 1 , 2);
+	createNode(4, 8);
+	createNode(7, 5);
+	createNode(7, 3);
+	createNode(2, 3);
+	createNode(1, 2);
+	createNode(2, 0);
+	addRoads(4, 5, 1);
+	addRoads(5, 2, 1);
+	addRoads(0, 4, 2);
+	addRoads(4, 2, 1);
+	addRoads(0, 1, 1);
 	addRoads(1, 2, 1);
-	addRoads(1, 3, 1);
-	addRoads(2, 3, 3);
-	addRoads(0, 4, 3);
-	addRoads(4, 3, 3);
-	//addRoads(6, 2, 1);
-	//addRoads(6, 5, 2);
-	//addRoads(5, 4, 4);
-	//addRoads(4, 3, 4);
-	//addRoads(3, 2, 3);
+	addRoads(0, 3, 2);
+	addRoads(3, 2, 2);
 	node* nodes = getSetupData();
 	printf("Here");
 	for (int i = 0; i < MAX_JUNCS; i++) {
@@ -38,7 +34,6 @@ int main() {
 
 	int arr[NUM_VEHICLES][MAX_ROADS];
 	generateRoutesOutput(arr);
-	printf("Here");
 	for (int i = 0; i < NUM_VEHICLES; i++) {
 		for (int j = 0; j < MAX_ROADS; j++) {
 			printf("%d ", arr[i][j]);
