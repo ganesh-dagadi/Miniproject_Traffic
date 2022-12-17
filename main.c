@@ -4,7 +4,7 @@
 #define MAX_JUNCS 10
 #define MAX_ROADS 10
 #define NUM_JUNCS 5
-#define NUM_VEHICLES 3
+#define NUM_VEHICLES 7
 typedef struct road {
     int to;
     int dis;
@@ -28,7 +28,7 @@ void displayRoads(int nodeId);
 short int prepareRoutes(int arr[NUM_VEHICLES][MAX_ROADS]);
 void printOutput(int arr[NUM_VEHICLES][MAX_ROADS]);
 
-short int  main(void) {
+short int  fain(void) {
     //Creating our graph
     initialzeGraph();
     int output[NUM_VEHICLES][MAX_ROADS];
