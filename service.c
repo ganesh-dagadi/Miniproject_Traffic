@@ -8,8 +8,8 @@ int main() {
 	createNode(2, 3);
 	createNode(1, 2);
 	createNode(2, 0);
-	addRoads(4, 5, 1);
-	addRoads(5, 2, 1);
+	addRoads(4, 5, 2);
+	addRoads(5, 2, 2);
 	addRoads(0, 4, 2);
 	addRoads(4, 2, 1);
 	addRoads(0, 1, 1);
