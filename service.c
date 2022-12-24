@@ -12,6 +12,8 @@ typedef struct operation {
 	short int nodeId;
 	road* rd;
 	short int fromNodeId;
+	int src;
+	int dest;
 }operation;
 
 operation operations[30];
@@ -39,7 +41,7 @@ node* initialSetup() {
 	return getSetupData();
 }
 
-void addOperation(char op, short int x, short int y, short int to, short int from, short int capacity, short int nodeId, road* rd, short int fromNodeId)
+void addOperation(char op, short int x, short int y, short int to, short int from, short int capacity, short int nodeId, road* rd, short int fromNodeId, int src, int dest)
 {
 	/*
 	add node : n
@@ -47,6 +49,8 @@ void addOperation(char op, short int x, short int y, short int to, short int fro
 	remove road : k
 	remove node : l
 	change capacity : c
+	change src : s
+	change dest: d
 	*/
 	int i;
 	for (i = 0; i < 30; i++) {
@@ -78,6 +82,15 @@ void addOperation(char op, short int x, short int y, short int to, short int fro
 	case 'c':
 		operations[i].option = 'c';
 		operations[i].capacity = capacity;
+		break;
+	case 's':
+		operations[i].option = 's';
+		operations[i].src = src;
+		break;
+	case 'd':
+		operations[i].option = 'd';
+		operations[i].dest = dest;
+		break;
 	}
 }
 
@@ -103,14 +116,14 @@ node* refreshSetup() {
 		if (operations[i].option == '0') {
 			break;
 		}
-		
+
 		switch (operations[i].option) {
 		case 'n':
 			printf("Ran %d times \n", i);
 			createNode(operations[i].x, operations[i].y);
 			break;
 		case 'r':
-			addRoads(operations[i].from, operations[i].to , operations[i].capacity);
+			addRoads(operations[i].from, operations[i].to, operations[i].capacity);
 			break;
 		case 'k':
 			removeRoad(operations[i].rd, operations[i].fromNodeId);
@@ -120,12 +133,16 @@ node* refreshSetup() {
 			break;
 		case 'c':
 			changeRoadCapacity(operations[i].rd, operations[i].capacity);
+			break;
+		case 's':
+			setSourceNode(operations[i].src);
+			break;
+		case 'd':
+			setDestNode(operations[i].dest);
 		}
 	}
-
 	return getSetupData();
 }
-
 int** SfindPaths(int arr[NUM_VEHICLES][MAX_ROADS]) {
 	return generateRoutesOutput(arr);
 }

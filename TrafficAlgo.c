@@ -1,34 +1,41 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
-#define MAX_JUNCS 10
-#define MAX_ROADS 10
-#define NUM_JUNCS 10
-#define NUM_VEHICLES 4
-
+#include "UserDefVar.h"
+//#define MAX_JUNCS 10
+//#define MAX_ROADS 10
+//#define NUM_JUNCS 10
+//#define NUM_VEHICLES 4
+//
 int sourceNode = 0;
 int destNode = 3;
-
-typedef struct road {
-    int to;
-    float dis;
-    int capacity;
-}road;
-
-typedef struct node {
-    int id;
-    int explored;
-    road* roads[MAX_ROADS];
-    int prev;
-    float shortestDis;
-    float currDis;
-    int comingFrom;
-    int x;
-    int y;
-}node;
+//
+//typedef struct road {
+//    int to;
+//    float dis;
+//    int capacity;
+//}road;
+//
+//typedef struct node {
+//    int id;
+//    int explored;
+//    road* roads[MAX_ROADS];
+//    int prev;
+//    float shortestDis;
+//    float currDis;
+//    int comingFrom;
+//    int x;
+//    int y;
+//}node;
 node nodes[MAX_JUNCS];
 
+void setSourceNode(int nodeId) {
+    sourceNode = nodeId;
+}
+
+void setDestNode(int nodeId) {
+    destNode = nodeId;
+}
 void initializeNodes() {
     int i = 0;
     for (i; i < MAX_JUNCS; i++) {
