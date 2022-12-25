@@ -46,8 +46,8 @@ void addOperation(char op, short int x, short int y, short int to, short int fro
 	/*
 	add node : n
 	add Road : r
-	remove road : k
-	remove node : l
+	remove node : k
+	remove road : l
 	change capacity : c
 	change src : s
 	change dest: d
@@ -125,10 +125,10 @@ node* refreshSetup() {
 		case 'r':
 			addRoads(operations[i].from, operations[i].to, operations[i].capacity);
 			break;
-		case 'k':
+		case 'l':
 			removeRoad(operations[i].rd, operations[i].fromNodeId);
 			break;
-		case 'l':
+		case 'k':
 			removeNode(operations[i].nodeId);
 			break;
 		case 'c':

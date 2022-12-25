@@ -1,11 +1,17 @@
 #include <windows.h>
 #include "service.h"
 #include <CommCtrl.h>
+#include "resources.h"
 
 void tostring(wchar_t str[], int num)
 {
     int i, rem, len = 0, n;
 
+    if (num == 0) {
+        str[0] = L'0';
+        str[1] = L'\0';
+        return;
+    }
     n = num;
     
     while (n != 0)
@@ -17,9 +23,22 @@ void tostring(wchar_t str[], int num)
     {
         rem = num % 10;
         num = num / 10;
-        str[len - (i + 1)] = rem + '0';
+        str[len - (i + 1)] = rem + L'0';
     }
-    str[len] = '\0';
+    str[len] = L'\0';
+}
+
+HWND CreateListBox(HWND hwnd) {
+    wchar_t strInt[3];
+    node* nodes = initialSetup();
+    HWND hwnd_NodesLB = CreateWindowW(L"ListBox", NULL, WS_VISIBLE | WS_CHILD | LBS_STANDARD | LBS_NOTIFY, 70, 130, 400, 200, hwnd, (HMENU)LB_NODE, NULL, NULL);
+    for (int i = 0; i < MAX_JUNCS; i++) {
+        if (nodes[i].id == -1) continue;
+        tostring(strInt, nodes[i].id);
+       // MessageBox(NULL, )
+        SendMessageW(hwnd_NodesLB, LB_ADDSTRING, NULL, (LPARAM)strInt);
+    }
+    return hwnd_NodesLB;
 }
 
 BOOL InitListViewColumns(HWND hWndListView)
@@ -42,12 +61,12 @@ BOOL InitListViewColumns(HWND hWndListView)
     SendMessage(hWndListView, LVM_INSERTCOLUMN, 3, (LPARAM)&lvc); // Insert/Show the coloum
     return TRUE;
 }
-void createWindowControls(HWND hwnd) {
+void creatWindowControls(HWND hwnd) {
 
     //Scroll bar
 
     
-    wchar_t strInt[3];
+    
     HWND hwnd_title = CreateWindowW(L"static", L"Traffic Optimizer", WS_CHILD | WS_VISIBLE | SS_CENTER, 300, 20, 150, 30, hwnd, NULL, NULL, NULL);
     HWND hwnd_SimButton = CreateWindowW(L"button", L"Show output", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 20, 150, 30, hwnd, NULL, NULL, NULL);
     HWND hwnd_maxNodes = CreateWindowW(L"static", L"Max nodes: 10", WS_CHILD | WS_VISIBLE | SS_CENTER, 70, 60, 150, 50, hwnd, NULL, NULL, NULL);
@@ -57,13 +76,7 @@ void createWindowControls(HWND hwnd) {
     HWND hwnd_AddNodeButton = CreateWindowW(L"button", L"AddNode", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 100, 150, 30, hwnd, NULL, NULL, NULL);
 
     //Entering Nodes into listbox
-    node* nodes = initialSetup();
-    HWND hwnd_NodesLB = CreateWindowW(L"ListBox" , NULL , WS_VISIBLE | WS_CHILD | LBS_STANDARD | LBS_NOTIFY , 70 , 130 , 400 , 200 , hwnd , NULL , NULL , NULL);
-    for (int i = 0; i < MAX_JUNCS; i++) {
-        if (nodes[i].id == -1) continue;
-        tostring(strInt, nodes[i].id);
-        SendMessageW(hwnd_NodesLB, LB_ADDSTRING, NULL, (LPARAM) strInt);
-    }
+    
 
     // Node info
     HWND hwnd_nodeInfoTitle = CreateWindowW(L"static", L"Node Info:", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 150, 150, 30, hwnd, NULL, NULL, NULL);
@@ -76,7 +89,7 @@ void createWindowControls(HWND hwnd) {
     HWND hwnd_NodeDelButton = CreateWindowW(L"button", L"Delete Node", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 260, 150, 30, hwnd, NULL, NULL, NULL);
 
     //Roads info
-    HWND hwnd_listView = CreateWindow(WC_LISTVIEW, NULL, WS_VISIBLE | WS_CHILD | LVS_REPORT| LVS_EX_AUTOSIZECOLUMNS, 70, 350, 400, 200, hwnd, NULL, NULL, NULL);
+    HWND hwnd_listView = CreateWindowW(WC_LISTVIEW, NULL, WS_VISIBLE | WS_CHILD | LVS_REPORT| LVS_EX_AUTOSIZECOLUMNS, 70, 350, 400, 200, hwnd, NULL, NULL, NULL);
     InitListViewColumns(hwnd_listView);
 
     //Roads operations

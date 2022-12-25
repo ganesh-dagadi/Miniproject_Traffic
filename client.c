@@ -4,6 +4,8 @@
 #include <windows.h>
 #include "resources.h"
 #include "ClientFuncs.h"
+#include "service.h"
+#include <CommCtrl.h>
 int kain() {
 	node* nodes = initialSetup();
 	for (int i = 0; i < MAX_JUNCS; i++) {
@@ -63,24 +65,112 @@ int kain() {
 
 const char g_szClassName[] = "myWindowClass";
 
+HWND hwnd_nodeInfoPosXEdit;
+HWND hwnd_nodeInfoPosYEdit;
+HWND hwnd_AddNodeButton;
+HWND hwnd_NodesLB;
+HWND hwnd_NodeDelButton;
+node* selectedNode;
 
-
+void createWindowControls(HWND hwnd);
 // Step 4: the Window Procedure
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+    
+    wchar_t clickedNodeId[5];
+    
     switch (msg)
     {
-    case WM_LBUTTONDOWN:
-        {
-            char szFileName[MAX_PATH];
-            HINSTANCE hInstance = GetModuleHandle(NULL);
-
-            GetModuleFileName(hInstance, szFileName, MAX_PATH);
-            MessageBox(hwnd, szFileName, L"This program is:", MB_OK | MB_ICONINFORMATION);
-        }
-        break;
     case WM_CREATE:
+    {
         createWindowControls(hwnd);
+        hwnd_NodesLB = CreateListBox(hwnd);
+    }
+    break;
+    case WM_COMMAND:
+        {
+        int wmId = LOWORD(wParam);
+        switch (wmId) {
+            case LB_NODE:
+                switch (HIWORD(wParam)) {
+                    case LBN_SELCHANGE:
+                    {
+                        POINT p;
+                        p.x = 100;
+                        p.y = 150;
+                        HWND ListBox = ChildWindowFromPoint(hwnd , p);
+                        int count = SendMessage(ListBox, LB_GETCOUNT, 0, 0);
+                        int iSelected = -1;
+                        // go through the items and find the first selected one
+                        for (int i = 0; i < count; i++)
+                        {
+                            // check if this item is selected or not..
+                            if (SendMessage(ListBox, LB_GETSEL, i, 0) > 0)
+                            {
+                                // yes, we only want the first selected so break.
+                                iSelected = i;
+                                break;
+                            }
+
+                        }
+                        //tostring(str, iSelected);
+                        SendMessage(ListBox, LB_GETTEXT, iSelected, (LPARAM)clickedNodeId);
+                        //wchar_t zero = '0';
+                        int selectedNodeId = clickedNodeId[0] - L'0';
+                        selectedNode = getNode(selectedNodeId);
+                        
+                           //setting node x y pos
+                        wchar_t str[5];
+                        tostring(str, selectedNode->x);
+                        if (SetWindowText(hwnd_nodeInfoPosXEdit, str) == 0) {
+                            MessageBox(NULL, L"Something went wrong!", L"Error!",
+                                MB_ICONEXCLAMATION | MB_OK);
+                        };
+
+                        tostring(str, selectedNode->y);
+                        if (SetWindowText(hwnd_nodeInfoPosYEdit, str) == 0) {
+                            MessageBox(NULL, L"Something went wrong!", L"Error!",
+                                MB_ICONEXCLAMATION | MB_OK);
+                        };
+                    }
+                    break;
+                }
+                break;
+            case ADD_NODE_BTN:
+            {
+                wchar_t str[5];
+                GetWindowText(hwnd_nodeInfoPosXEdit, &str, 2);
+                int Xpos = str[0] - L'0';
+                GetWindowText(hwnd_nodeInfoPosYEdit, &str, 2);
+                int Ypos = str[0] - L'0';
+                addOperation('n', Xpos, Ypos, 0, 0, 0, 0, 0, 0, 0, 0);
+                node* nodes = refreshSetup();
+                wchar_t strInt[3];
+                SendMessage(hwnd_NodesLB, LB_RESETCONTENT, NULL, NULL);
+                for (int i = 0; i < MAX_JUNCS; i++) {
+                    if (nodes[i].id == -1) continue;
+                    tostring(strInt, nodes[i].id);
+                    // MessageBox(NULL, )
+                    SendMessageW(hwnd_NodesLB, LB_ADDSTRING, NULL, (LPARAM)strInt);
+                }
+            }
+            break;
+            case DEL_NODE_BTN:
+            {
+                addOperation('k', 0, 0, 0, 0, 0, selectedNode->id, NULL, 0, 0, 0);
+                node* nodes = refreshSetup();
+                wchar_t strInt[3];
+                SendMessage(hwnd_NodesLB, LB_RESETCONTENT, NULL, NULL);
+                for (int i = 0; i < MAX_JUNCS; i++) {
+                    if (nodes[i].id == -1) continue;
+                    tostring(strInt, nodes[i].id);
+                    // MessageBox(NULL, )
+                    SendMessageW(hwnd_NodesLB, LB_ADDSTRING, NULL, (LPARAM)strInt);
+                }
+            }
+            break;
+        }
+        }
         break;
     case WM_CLOSE:
         DestroyWindow(hwnd);
@@ -147,6 +237,55 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
         DispatchMessage(&Msg);
     }
     return Msg.wParam;
+}
+
+void createWindowControls(HWND hwnd) {
+
+    //Scroll bar
+
+
+
+    HWND hwnd_title = CreateWindowW(L"static", L"Traffic Optimizer", WS_CHILD | WS_VISIBLE | SS_CENTER, 300, 20, 150, 30, hwnd, NULL, NULL, NULL);
+    HWND hwnd_SimButton = CreateWindowW(L"button", L"Show output", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 20, 150, 30, hwnd, NULL, NULL, NULL);
+    HWND hwnd_maxNodes = CreateWindowW(L"static", L"Max nodes: 10", WS_CHILD | WS_VISIBLE | SS_CENTER, 70, 60, 150, 50, hwnd, NULL, NULL, NULL);
+
+    //From nodes
+    HWND hwnd_nodes = CreateWindowW(L"static", L"Nodes:", WS_CHILD | WS_VISIBLE | SS_CENTER, 50, 100, 150, 20, hwnd, NULL, NULL, NULL);
+    hwnd_AddNodeButton = CreateWindowW(L"button", L"AddNode", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 100, 150, 30, hwnd, ADD_NODE_BTN , NULL, NULL);
+
+    //Entering Nodes into listbox
+
+
+    // Node info
+    HWND hwnd_nodeInfoTitle = CreateWindowW(L"static", L"Node Info:", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 150, 150, 30, hwnd, NULL, NULL, NULL);
+    HWND hwnd_nodeInfoPos = CreateWindowW(L"static", L"Position:", WS_CHILD | WS_VISIBLE | SS_CENTER, 490, 180, 50, 20, hwnd, NULL, NULL, NULL);
+    HWND hwnd_nodeInfoPosX = CreateWindowW(L"static", L"X:", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 180, 20, 20, hwnd, NULL, NULL, NULL);
+    hwnd_nodeInfoPosXEdit = CreateWindowW(L"edit", L"10", WS_CHILD | WS_VISIBLE | SS_CENTER, 580, 180, 50, 20, hwnd, NULL, NULL, NULL);
+    HWND hwnd_nodeInfoPosY = CreateWindowW(L"static", L"Y:", WS_CHILD | WS_VISIBLE | SS_CENTER, 660, 180, 20, 20, hwnd, NULL, NULL, NULL);
+    hwnd_nodeInfoPosYEdit = CreateWindowW(L"edit", L"10", WS_CHILD | WS_VISIBLE | SS_CENTER, 700, 180, 50, 20, hwnd, NULL, NULL, NULL);
+    HWND hwnd_NodeSaveButton = CreateWindowW(L"button", L"Save", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 220, 150, 30, hwnd, NULL, NULL, NULL);
+    hwnd_NodeDelButton = CreateWindowW(L"button", L"Delete Node", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 260, 150, 30, hwnd, DEL_NODE_BTN, NULL, NULL);
+
+    //Roads info
+    HWND hwnd_listView = CreateWindowW(WC_LISTVIEW, NULL, WS_VISIBLE | WS_CHILD | LVS_REPORT | LVS_EX_AUTOSIZECOLUMNS, 70, 350, 400, 200, hwnd, NULL, NULL, NULL);
+    InitListViewColumns(hwnd_listView);
+
+    //Roads operations
+
+    HWND hwnd_roadCapL = CreateWindowW(L"Static", L"Capacity :", WS_VISIBLE | WS_CHILD | SS_CENTER, 520, 350, 60, 20, hwnd, NULL, NULL, NULL);
+    HWND hwnd_capacity = CreateWindowW(L"Edit", L"2", WS_VISIBLE | WS_CHILD | SS_CENTER, 580, 350, 30, 20, hwnd, NULL, NULL, NULL);
+    HWND hwnd_capacitySaveButton = CreateWindowW(L"button", L"Save", WS_CHILD | WS_VISIBLE | SS_CENTER, 620, 350, 50, 30, hwnd, NULL, NULL, NULL);
+    HWND hwnd_DelRoadButtonn = CreateWindowW(L"button", L"Del", WS_CHILD | WS_VISIBLE | SS_CENTER, 700, 350, 50, 30, hwnd, NULL, NULL, NULL);
+
+    //Add road
+    HWND hwnd_addRoadL = CreateWindowW(L"Static", L"Add road", WS_VISIBLE | WS_CHILD | SS_CENTER, 480, 400, 60, 20, hwnd, NULL, NULL, NULL);
+    HWND hwnd_addRoadFromL = CreateWindowW(L"Static", L"From :", WS_VISIBLE | WS_CHILD | SS_CENTER, 480, 430, 60, 20, hwnd, NULL, NULL, NULL);
+    HWND hwnd_addRoadFrom = CreateWindowW(L"Edit", L"2", WS_VISIBLE | WS_CHILD | SS_CENTER, 520, 430, 30, 20, hwnd, NULL, NULL, NULL);
+    HWND hwnd_addRoadToL = CreateWindowW(L"Static", L"TO:", WS_VISIBLE | WS_CHILD | SS_CENTER, 540, 430, 60, 20, hwnd, NULL, NULL, NULL);
+    HWND hwnd_addRoadTo = CreateWindowW(L"Edit", L"2", WS_VISIBLE | WS_CHILD | SS_CENTER, 580, 430, 30, 20, hwnd, NULL, NULL, NULL);
+    HWND hwnd_addRoadCapL = CreateWindowW(L"Static", L"Capacity :", WS_VISIBLE | WS_CHILD | SS_CENTER, 610, 430, 100, 20, hwnd, NULL, NULL, NULL);
+    HWND hwnd_addRoadcapacity = CreateWindowW(L"Edit", L"2", WS_VISIBLE | WS_CHILD | SS_CENTER, 710, 430, 30, 20, hwnd, NULL, NULL, NULL);
+    HWND hwnd_addRoadAddButton = CreateWindowW(L"button", L"Add", WS_CHILD | WS_VISIBLE | SS_CENTER, 600, 470, 50, 30, hwnd, NULL, NULL, NULL);
 }
 
 

@@ -1,3 +1,5 @@
 #pragma once
 #include <windows.h>
-void createWindowControls(HWND hwnd);
+void creatWindowControls(HWND hwnd);
+HWND CreateListBox(HWND hwnd);
+void tostring(wchar_t str[], int num);
