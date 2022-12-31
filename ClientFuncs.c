@@ -31,7 +31,7 @@ void tostring(wchar_t str[], int num)
 HWND CreateListBox(HWND hwnd) {
     wchar_t strInt[3];
     node* nodes = initialSetup();
-    HWND hwnd_NodesLB = CreateWindowW(L"ListBox", NULL, WS_VISIBLE | WS_CHILD | LBS_STANDARD | LBS_NOTIFY, 70, 130, 400, 200, hwnd, (HMENU)LB_NODE, NULL, NULL);
+    HWND hwnd_NodesLB = CreateWindowW(L"ListBox", NULL, WS_VISIBLE | WS_CHILD | LBS_STANDARD | LBS_NOTIFY, 70, 130, 400, 200, hwnd, (HMENU)LB_NODE ,  NULL, NULL);
     for (int i = 0; i < MAX_JUNCS; i++) {
         if (nodes[i].id == -1) continue;
         tostring(strInt, nodes[i].id);

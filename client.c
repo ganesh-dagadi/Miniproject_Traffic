@@ -71,8 +71,14 @@ HWND hwnd_AddNodeButton;
 HWND hwnd_NodesLB;
 HWND hwnd_NodeDelButton;
 node* selectedNode;
+road* selectedRoad;
+HWND hwnd_listView;
+HWND hwnd_capacity;
+
+road* roadVect[MAX_ROADS];
 
 void createWindowControls(HWND hwnd);
+//void floatToStr(wchar_t str[], float flt);
 // Step 4: the Window Procedure
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -118,6 +124,45 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                         //wchar_t zero = '0';
                         int selectedNodeId = clickedNodeId[0] - L'0';
                         selectedNode = getNode(selectedNodeId);
+                        
+                        //populating roads pointer vector
+                        //inserting into listview
+                        ListView_DeleteAllItems(hwnd_listView);
+                        LVITEM item;
+                        item.mask = LVIF_TEXT;
+                        item.cchTextMax = 6;
+                        int i;
+                        for (i = 0; i < MAX_ROADS; i++) {
+                            if (selectedNode->roads[i] == NULL) {
+                                continue;
+                            }
+                            roadVect[i] = selectedNode->roads[i];
+
+                            item.iSubItem = 0;
+                            wchar_t str[5];
+                            tostring(str, selectedNode->id);
+                            item.pszText = str;
+                            item.iItem = 0;
+                            ListView_InsertItem(hwnd_listView, &item);
+
+                            item.iSubItem = 1; // zero based index of column
+                            tostring(str, roadVect[i]->to);
+                            item.pszText = str;
+                
+                            ListView_SetItem(hwnd_listView, &item);
+                            item.iSubItem = 2; // zero based index of column
+                            tostring(str, roadVect[i]->capacity);
+                            item.pszText = str;
+                            ListView_SetItem(hwnd_listView, &item);
+
+                            item.iSubItem = 3; // zero based index of column
+                            int disInt = (int)roadVect[i]->dis;
+                            tostring(str, disInt);
+                            item.pszText = str;
+                            ListView_SetItem(hwnd_listView, &item);
+                        }
+
+                        
                         
                            //setting node x y pos
                         wchar_t str[5];
@@ -169,9 +214,39 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 }
             }
             break;
+            case LISTVIEW_ROAD:
+            {
+                MessageBox(NULL, L"Window Creation Failed!", L"Error!",
+                    MB_ICONEXCLAMATION | MB_OK);
+            }
+            break;
         }
         }
         break;
+    case WM_NOTIFY:
+    {
+        if (((LPNMHDR)lParam)->hwndFrom == hwnd_listView) {
+            switch (((LPNMHDR)lParam)->code) {
+            case NM_DBLCLK:
+            {
+                int itemint = SendMessage(hwnd_listView, LVM_GETNEXTITEM , -1, LVNI_SELECTED);
+                //itemint--;
+                selectedRoad = roadVect[itemint];
+                road* t = selectedRoad;
+                wchar_t str[5];
+                tostring(str, selectedRoad->capacity);
+                SetWindowText(hwnd_capacity, str);
+                
+
+                //set road info edits
+                    
+
+            }
+            break;
+            }
+        }
+    }
+    break;
     case WM_CLOSE:
         DestroyWindow(hwnd);
         break;
@@ -267,13 +342,13 @@ void createWindowControls(HWND hwnd) {
     hwnd_NodeDelButton = CreateWindowW(L"button", L"Delete Node", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 260, 150, 30, hwnd, DEL_NODE_BTN, NULL, NULL);
 
     //Roads info
-    HWND hwnd_listView = CreateWindowW(WC_LISTVIEW, NULL, WS_VISIBLE | WS_CHILD | LVS_REPORT | LVS_EX_AUTOSIZECOLUMNS, 70, 350, 400, 200, hwnd, NULL, NULL, NULL);
+    hwnd_listView = CreateWindowW(WC_LISTVIEW, NULL, WS_VISIBLE | WS_CHILD | LVS_REPORT | LVS_SORTASCENDING | LVS_SHOWSELALWAYS, 70, 350, 400, 200, hwnd, (HMENU)LISTVIEW_ROAD, NULL, NULL);
     InitListViewColumns(hwnd_listView);
 
     //Roads operations
 
     HWND hwnd_roadCapL = CreateWindowW(L"Static", L"Capacity :", WS_VISIBLE | WS_CHILD | SS_CENTER, 520, 350, 60, 20, hwnd, NULL, NULL, NULL);
-    HWND hwnd_capacity = CreateWindowW(L"Edit", L"2", WS_VISIBLE | WS_CHILD | SS_CENTER, 580, 350, 30, 20, hwnd, NULL, NULL, NULL);
+    hwnd_capacity = CreateWindowW(L"Edit", L"2", WS_VISIBLE | WS_CHILD | SS_CENTER, 580, 350, 30, 20, hwnd, NULL, NULL, NULL);
     HWND hwnd_capacitySaveButton = CreateWindowW(L"button", L"Save", WS_CHILD | WS_VISIBLE | SS_CENTER, 620, 350, 50, 30, hwnd, NULL, NULL, NULL);
     HWND hwnd_DelRoadButtonn = CreateWindowW(L"button", L"Del", WS_CHILD | WS_VISIBLE | SS_CENTER, 700, 350, 50, 30, hwnd, NULL, NULL, NULL);
 
