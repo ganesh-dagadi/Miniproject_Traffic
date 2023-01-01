@@ -118,10 +118,18 @@ void addRoads(int from , int to , int capacity) {
 }
 //TODO VERIFY The next 2 FUNC WORK
 void removeRoad(road* rd, int fromNodeId) {
+    node* fromNode = getNode(fromNodeId);
     node* toNode = getNode(rd->to);
-    printf("%d \n ", toNode->id);
-    rd = NULL;
     int j;
+    for (j = 0; j < MAX_ROADS; j++) {
+        if (!(*toNode).roads[j]) {
+            continue;
+        }
+        if (fromNode->roads[j] == rd) {
+            fromNode->roads[j] = NULL;
+        }
+    }
+    rd = NULL;
     for (j = 0; j < MAX_ROADS; j++) {
         if (! (*toNode).roads[j]) {
             continue;

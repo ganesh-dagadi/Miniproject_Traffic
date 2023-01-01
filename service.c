@@ -82,6 +82,7 @@ void addOperation(char op, short int x, short int y, short int to, short int fro
 	case 'c':
 		operations[i].option = 'c';
 		operations[i].capacity = capacity;
+		operations[i].rd = rd;
 		break;
 	case 's':
 		operations[i].option = 's';

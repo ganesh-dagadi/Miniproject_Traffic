@@ -74,6 +74,7 @@ node* selectedNode;
 road* selectedRoad;
 HWND hwnd_listView;
 HWND hwnd_capacity;
+HWND hwnd_capacitySaveButton;
 
 road* roadVect[MAX_ROADS];
 
@@ -161,8 +162,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                             item.pszText = str;
                             ListView_SetItem(hwnd_listView, &item);
                         }
-
-                        
                         
                            //setting node x y pos
                         wchar_t str[5];
@@ -214,10 +213,29 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 }
             }
             break;
-            case LISTVIEW_ROAD:
+            case SAVE_CAPACITY:
             {
-                MessageBox(NULL, L"Window Creation Failed!", L"Error!",
-                    MB_ICONEXCLAMATION | MB_OK);
+                if (!selectedRoad) {
+                    MessageBox(NULL, L"Window Creation Failed!", L"Error!",
+                        MB_ICONEXCLAMATION | MB_OK);
+                }
+                else {
+                    wchar_t str[5];
+                    GetWindowText(hwnd_capacity, &str, 2);
+                    int cap = str[0] - L'0';
+                    changeRoadCapacity(selectedRoad, cap);
+                }
+            }
+            break;
+            case DEL_ROAD:
+            {
+                if (!selectedRoad) {
+                    MessageBox(NULL, L"Window Creation Failed!", L"Error!",
+                        MB_ICONEXCLAMATION | MB_OK);
+                }
+                else {
+                    removeRoad(selectedRoad, selectedNode->id);
+                }
             }
             break;
         }
@@ -230,17 +248,24 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             case NM_DBLCLK:
             {
                 int itemint = SendMessage(hwnd_listView, LVM_GETNEXTITEM , -1, LVNI_SELECTED);
-                //itemint--;
-                selectedRoad = roadVect[itemint];
-                road* t = selectedRoad;
-                wchar_t str[5];
-                tostring(str, selectedRoad->capacity);
-                SetWindowText(hwnd_capacity, str);
+                
+               
+               
                 
 
                 //set road info edits
-                    
-
+                int numRoads = 0;
+                int i = 0;
+                while (roadVect[i] != NULL) {
+                    i++;
+                    numRoads++;
+                }
+                int pos = numRoads - itemint - 1;
+                selectedRoad = roadVect[pos];
+                road* e = selectedRoad;
+                wchar_t str[5];
+                tostring(str, selectedRoad->capacity);
+                SetWindowText(hwnd_capacity, str);
             }
             break;
             }
@@ -342,15 +367,15 @@ void createWindowControls(HWND hwnd) {
     hwnd_NodeDelButton = CreateWindowW(L"button", L"Delete Node", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 260, 150, 30, hwnd, DEL_NODE_BTN, NULL, NULL);
 
     //Roads info
-    hwnd_listView = CreateWindowW(WC_LISTVIEW, NULL, WS_VISIBLE | WS_CHILD | LVS_REPORT | LVS_SORTASCENDING | LVS_SHOWSELALWAYS, 70, 350, 400, 200, hwnd, (HMENU)LISTVIEW_ROAD, NULL, NULL);
+    hwnd_listView = CreateWindowW(WC_LISTVIEW, NULL, WS_VISIBLE | WS_CHILD | LVS_REPORT | LVS_SORTASCENDING | LVS_SHOWSELALWAYS, 70, 350, 400, 200, hwnd, NULL, NULL, NULL);
     InitListViewColumns(hwnd_listView);
 
     //Roads operations
 
     HWND hwnd_roadCapL = CreateWindowW(L"Static", L"Capacity :", WS_VISIBLE | WS_CHILD | SS_CENTER, 520, 350, 60, 20, hwnd, NULL, NULL, NULL);
     hwnd_capacity = CreateWindowW(L"Edit", L"2", WS_VISIBLE | WS_CHILD | SS_CENTER, 580, 350, 30, 20, hwnd, NULL, NULL, NULL);
-    HWND hwnd_capacitySaveButton = CreateWindowW(L"button", L"Save", WS_CHILD | WS_VISIBLE | SS_CENTER, 620, 350, 50, 30, hwnd, NULL, NULL, NULL);
-    HWND hwnd_DelRoadButtonn = CreateWindowW(L"button", L"Del", WS_CHILD | WS_VISIBLE | SS_CENTER, 700, 350, 50, 30, hwnd, NULL, NULL, NULL);
+    hwnd_capacitySaveButton = CreateWindowW(L"button", L"Save", WS_CHILD | WS_VISIBLE | SS_CENTER, 620, 350, 50, 30, hwnd, SAVE_CAPACITY, NULL, NULL);
+    HWND hwnd_DelRoadButtonn = CreateWindowW(L"button", L"Del", WS_CHILD | WS_VISIBLE | SS_CENTER, 700, 350, 50, 30, hwnd, DEL_ROAD, NULL, NULL);
 
     //Add road
     HWND hwnd_addRoadL = CreateWindowW(L"Static", L"Add road", WS_VISIBLE | WS_CHILD | SS_CENTER, 480, 400, 60, 20, hwnd, NULL, NULL, NULL);
