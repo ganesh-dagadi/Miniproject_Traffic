@@ -75,6 +75,9 @@ road* selectedRoad;
 HWND hwnd_listView;
 HWND hwnd_capacity;
 HWND hwnd_capacitySaveButton;
+HWND hwnd_addRoadFrom;
+HWND hwnd_addRoadTo;
+HWND hwnd_addRoadcapacity;
 
 road* roadVect[MAX_ROADS];
 
@@ -234,10 +237,26 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                         MB_ICONEXCLAMATION | MB_OK);
                 }
                 else {
-                    removeRoad(selectedRoad, selectedNode->id);
+                    //addOperation('l', NULL, NULL, NULL, NULL, NULL, NULL, selectedRoad, selectedNode->id, NULL, NULL);
+                    //refreshSetup();
+                    removeRoad(selectedRoad , selectedNode->id);
                 }
             }
             break;
+            case ADD_ROAD_BTN:
+            {
+                short from, to, cap;
+                //from
+                wchar_t str[5];
+                GetWindowText(hwnd_addRoadFrom, &str, 2);
+                from = str[0] - L'0';
+                GetWindowText(hwnd_addRoadTo, &str, 2);
+                to = str[0] - L'0';
+                GetWindowText(hwnd_addRoadcapacity, &str, 2);
+                cap = str[0] - L'0';
+                addOperation('r', 0, 0, to, from, cap, NULL, NULL, NULL, NULL, NULL);
+                refreshSetup();
+            }
         }
         }
         break;
@@ -363,7 +382,6 @@ void createWindowControls(HWND hwnd) {
     hwnd_nodeInfoPosXEdit = CreateWindowW(L"edit", L"10", WS_CHILD | WS_VISIBLE | SS_CENTER, 580, 180, 50, 20, hwnd, NULL, NULL, NULL);
     HWND hwnd_nodeInfoPosY = CreateWindowW(L"static", L"Y:", WS_CHILD | WS_VISIBLE | SS_CENTER, 660, 180, 20, 20, hwnd, NULL, NULL, NULL);
     hwnd_nodeInfoPosYEdit = CreateWindowW(L"edit", L"10", WS_CHILD | WS_VISIBLE | SS_CENTER, 700, 180, 50, 20, hwnd, NULL, NULL, NULL);
-    HWND hwnd_NodeSaveButton = CreateWindowW(L"button", L"Save", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 220, 150, 30, hwnd, NULL, NULL, NULL);
     hwnd_NodeDelButton = CreateWindowW(L"button", L"Delete Node", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 260, 150, 30, hwnd, DEL_NODE_BTN, NULL, NULL);
 
     //Roads info
@@ -380,12 +398,12 @@ void createWindowControls(HWND hwnd) {
     //Add road
     HWND hwnd_addRoadL = CreateWindowW(L"Static", L"Add road", WS_VISIBLE | WS_CHILD | SS_CENTER, 480, 400, 60, 20, hwnd, NULL, NULL, NULL);
     HWND hwnd_addRoadFromL = CreateWindowW(L"Static", L"From :", WS_VISIBLE | WS_CHILD | SS_CENTER, 480, 430, 60, 20, hwnd, NULL, NULL, NULL);
-    HWND hwnd_addRoadFrom = CreateWindowW(L"Edit", L"2", WS_VISIBLE | WS_CHILD | SS_CENTER, 520, 430, 30, 20, hwnd, NULL, NULL, NULL);
+    hwnd_addRoadFrom = CreateWindowW(L"Edit", L"2", WS_VISIBLE | WS_CHILD | SS_CENTER, 520, 430, 30, 20, hwnd, NULL, NULL, NULL);
     HWND hwnd_addRoadToL = CreateWindowW(L"Static", L"TO:", WS_VISIBLE | WS_CHILD | SS_CENTER, 540, 430, 60, 20, hwnd, NULL, NULL, NULL);
-    HWND hwnd_addRoadTo = CreateWindowW(L"Edit", L"2", WS_VISIBLE | WS_CHILD | SS_CENTER, 580, 430, 30, 20, hwnd, NULL, NULL, NULL);
+    hwnd_addRoadTo = CreateWindowW(L"Edit", L"2", WS_VISIBLE | WS_CHILD | SS_CENTER, 580, 430, 30, 20, hwnd, NULL, NULL, NULL);
     HWND hwnd_addRoadCapL = CreateWindowW(L"Static", L"Capacity :", WS_VISIBLE | WS_CHILD | SS_CENTER, 610, 430, 100, 20, hwnd, NULL, NULL, NULL);
-    HWND hwnd_addRoadcapacity = CreateWindowW(L"Edit", L"2", WS_VISIBLE | WS_CHILD | SS_CENTER, 710, 430, 30, 20, hwnd, NULL, NULL, NULL);
-    HWND hwnd_addRoadAddButton = CreateWindowW(L"button", L"Add", WS_CHILD | WS_VISIBLE | SS_CENTER, 600, 470, 50, 30, hwnd, NULL, NULL, NULL);
+    hwnd_addRoadcapacity = CreateWindowW(L"Edit", L"2", WS_VISIBLE | WS_CHILD | SS_CENTER, 710, 430, 30, 20, hwnd, NULL, NULL, NULL);
+    HWND hwnd_addRoadAddButton = CreateWindowW(L"button", L"Add", WS_CHILD | WS_VISIBLE | SS_CENTER, 600, 470, 50, 30, hwnd,  ADD_ROAD_BTN, NULL, NULL);
 }
 
 

@@ -6,3 +6,4 @@
 #define DEL_NODE_BTN 30
 #define SAVE_CAPACITY 40
 #define DEL_ROAD 50
+#define ADD_ROAD_BTN 60
