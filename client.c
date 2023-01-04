@@ -82,6 +82,27 @@ HWND hwnd_addRoadcapacity;
 road* roadVect[MAX_ROADS];
 
 void createWindowControls(HWND hwnd);
+
+LRESULT CALLBACK outputProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    switch (msg)
+    {
+    case WM_CREATE:
+    {
+        MessageBox(NULL, L"Window Registration Failed!", L"Error!",
+            MB_ICONEXCLAMATION | MB_OK);
+    }
+    break;
+    case WM_CLOSE:
+        DestroyWindow(hwnd);
+        break;
+    case WM_DESTROY:
+//        PostQuitMessage(0);
+        break;
+    default:
+        return DefWindowProc(hwnd, msg, wParam, lParam);
+    }
+    return 0;
+}
 //void floatToStr(wchar_t str[], float flt);
 // Step 4: the Window Procedure
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -257,6 +278,49 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 addOperation('r', 0, 0, to, from, cap, NULL, NULL, NULL, NULL, NULL);
                 refreshSetup();
             }
+            break;
+            case SHOW_OUTPUT:
+            {
+                WNDCLASSEX outputWindow;
+                HWND hwnd_outputWin;
+                outputWindow.cbSize = sizeof(WNDCLASSEX);
+                outputWindow.style = 0;
+                outputWindow.lpfnWndProc = outputProc;
+                outputWindow.cbClsExtra = 0;
+                outputWindow.cbWndExtra = 0;
+                outputWindow.hInstance = GetModuleHandle(NULL);
+                outputWindow.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+                outputWindow.hCursor = LoadCursor(NULL, IDC_ARROW);
+                outputWindow.hbrBackground = (HBRUSH)COLOR_WINDOW;
+                outputWindow.lpszMenuName = NULL;
+                outputWindow.lpszClassName = L"Output_window";
+                outputWindow.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+                if (!RegisterClassEx(&outputWindow))
+                {
+                    MessageBox(NULL, L"Window Registration Failed!", L"Error!",
+                        MB_ICONEXCLAMATION | MB_OK);
+                    return 0;
+                }
+
+                hwnd_outputWin = CreateWindowEx(
+                    WS_EX_CLIENTEDGE,
+                    L"Output_window",
+                    L"Output",
+                    WS_OVERLAPPEDWINDOW | WS_VSCROLL,
+                    CW_USEDEFAULT, CW_USEDEFAULT, 800, 600,
+                    NULL, NULL, GetModuleHandle(NULL), NULL);
+
+                if (hwnd_outputWin == NULL)
+                {
+                    MessageBox(NULL, L"Window Creation Failed!", L"Error!",
+                        MB_ICONEXCLAMATION | MB_OK);
+                    return 0;
+                }
+                ShowWindow(hwnd_outputWin, SW_SHOW);
+                UpdateWindow(hwnd_outputWin);
+
+            }
+            break;
         }
         }
         break;
@@ -365,7 +429,7 @@ void createWindowControls(HWND hwnd) {
 
 
     HWND hwnd_title = CreateWindowW(L"static", L"Traffic Optimizer", WS_CHILD | WS_VISIBLE | SS_CENTER, 300, 20, 150, 30, hwnd, NULL, NULL, NULL);
-    HWND hwnd_SimButton = CreateWindowW(L"button", L"Show output", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 20, 150, 30, hwnd, NULL, NULL, NULL);
+    HWND hwnd_SimButton = CreateWindowW(L"button", L"Show output", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 20, 150, 30, hwnd, SHOW_OUTPUT, NULL, NULL);
     HWND hwnd_maxNodes = CreateWindowW(L"static", L"Max nodes: 10", WS_CHILD | WS_VISIBLE | SS_CENTER, 70, 60, 150, 50, hwnd, NULL, NULL, NULL);
 
     //From nodes
