@@ -309,3 +309,10 @@ int** generateRoutesOutput(int arr[NUM_VEHICLES][MAX_ROADS]) {
     return arr;
 }
 
+int getSrcNode() {
+    return sourceNode;}
+
+
+int getDestNode() {
+    return destNode;
+}

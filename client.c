@@ -6,6 +6,7 @@
 #include "ClientFuncs.h"
 #include "service.h"
 #include <CommCtrl.h>
+#include <d2d1.h>
 int kain() {
 	node* nodes = initialSetup();
 	for (int i = 0; i < MAX_JUNCS; i++) {
@@ -78,7 +79,10 @@ HWND hwnd_capacitySaveButton;
 HWND hwnd_addRoadFrom;
 HWND hwnd_addRoadTo;
 HWND hwnd_addRoadcapacity;
-
+WNDCLASSEX outputWindow;
+HWND hwnd_outputWin;
+HWND hwnd_srcEdit;
+HWND hwnd_destEdit;
 road* roadVect[MAX_ROADS];
 
 void createWindowControls(HWND hwnd);
@@ -88,10 +92,9 @@ LRESULT CALLBACK outputProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     {
     case WM_CREATE:
     {
-        MessageBox(NULL, L"Window Registration Failed!", L"Error!",
-            MB_ICONEXCLAMATION | MB_OK);
     }
     break;
+    
     case WM_CLOSE:
         DestroyWindow(hwnd);
         break;
@@ -102,6 +105,31 @@ LRESULT CALLBACK outputProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         return DefWindowProc(hwnd, msg, wParam, lParam);
     }
     return 0;
+}
+
+void initWin2() {
+    
+    outputWindow.cbSize = sizeof(WNDCLASSEX);
+    outputWindow.style = 0;
+    outputWindow.lpfnWndProc = outputProc;
+    outputWindow.cbClsExtra = 0;
+    outputWindow.cbWndExtra = 0;
+    outputWindow.hInstance = GetModuleHandle(NULL);
+    outputWindow.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    outputWindow.hCursor = LoadCursor(NULL, IDC_ARROW);
+    outputWindow.hbrBackground = (HBRUSH)COLOR_WINDOW;
+    outputWindow.lpszMenuName = NULL;
+    outputWindow.lpszClassName = L"Output_window";
+    outputWindow.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+    int foundInstance = !GetClassInfoExA(GetModuleHandle(NULL), L"Output_window", &outputWindow);
+    if (foundInstance) {
+        if (!RegisterClassEx(&outputWindow))
+        {
+            MessageBox(NULL, L"Window Registration Failed!", L"Error!",
+                MB_ICONEXCLAMATION | MB_OK);
+            return 0;
+        }
+    }
 }
 //void floatToStr(wchar_t str[], float flt);
 // Step 4: the Window Procedure
@@ -281,27 +309,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             break;
             case SHOW_OUTPUT:
             {
-                WNDCLASSEX outputWindow;
-                HWND hwnd_outputWin;
-                outputWindow.cbSize = sizeof(WNDCLASSEX);
-                outputWindow.style = 0;
-                outputWindow.lpfnWndProc = outputProc;
-                outputWindow.cbClsExtra = 0;
-                outputWindow.cbWndExtra = 0;
-                outputWindow.hInstance = GetModuleHandle(NULL);
-                outputWindow.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-                outputWindow.hCursor = LoadCursor(NULL, IDC_ARROW);
-                outputWindow.hbrBackground = (HBRUSH)COLOR_WINDOW;
-                outputWindow.lpszMenuName = NULL;
-                outputWindow.lpszClassName = L"Output_window";
-                outputWindow.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-                if (!RegisterClassEx(&outputWindow))
-                {
-                    MessageBox(NULL, L"Window Registration Failed!", L"Error!",
-                        MB_ICONEXCLAMATION | MB_OK);
-                    return 0;
-                }
-
                 hwnd_outputWin = CreateWindowEx(
                     WS_EX_CLIENTEDGE,
                     L"Output_window",
@@ -321,6 +328,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
             }
             break;
+            case SAVE_SRC_DEST:
+            {
+                wchar_t str[5];
+                GetWindowText(hwnd_srcEdit, &str, 2);
+                int src = str[0] - L'0';
+                GetWindowText(hwnd_destEdit, &str, 2);
+                int dest = str[0] - L'0';
+                setSourceNode(src);
+                setDestNode(dest);
+            }
         }
         }
         break;
@@ -410,6 +427,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
             MB_ICONEXCLAMATION | MB_OK);
         return 0;
     }
+    initWin2();
     ShowWindow(hwnd, nCmdShow);
     UpdateWindow(hwnd);
 
@@ -446,8 +464,20 @@ void createWindowControls(HWND hwnd) {
     hwnd_nodeInfoPosXEdit = CreateWindowW(L"edit", L"10", WS_CHILD | WS_VISIBLE | SS_CENTER, 580, 180, 50, 20, hwnd, NULL, NULL, NULL);
     HWND hwnd_nodeInfoPosY = CreateWindowW(L"static", L"Y:", WS_CHILD | WS_VISIBLE | SS_CENTER, 660, 180, 20, 20, hwnd, NULL, NULL, NULL);
     hwnd_nodeInfoPosYEdit = CreateWindowW(L"edit", L"10", WS_CHILD | WS_VISIBLE | SS_CENTER, 700, 180, 50, 20, hwnd, NULL, NULL, NULL);
-    hwnd_NodeDelButton = CreateWindowW(L"button", L"Delete Node", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 260, 150, 30, hwnd, DEL_NODE_BTN, NULL, NULL);
+    hwnd_NodeDelButton = CreateWindowW(L"button", L"Delete Node", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 210, 150, 30, hwnd, DEL_NODE_BTN, NULL, NULL);
 
+    //source dest control
+    HWND hwnd_srcL = CreateWindowW(L"static", L"Source Node:", WS_CHILD | WS_VISIBLE | SS_CENTER, 450, 250, 150, 30, hwnd, NULL, NULL, NULL);
+    int src = getSrcNode();
+    wchar_t str1[5];
+    tostring(str1, src);
+    int dest = getDestNode();
+    wchar_t str2[5];
+    tostring(str2, dest);
+    hwnd_srcEdit = CreateWindowW(L"edit", str1, WS_CHILD | WS_VISIBLE | SS_CENTER, 580, 250, 50, 20, hwnd, NULL, NULL, NULL);
+    HWND hwnd_destL = CreateWindowW(L"static", L"Dest Node:", WS_CHILD | WS_VISIBLE | SS_CENTER, 620, 250, 150, 30, hwnd, NULL, NULL, NULL);
+    hwnd_destEdit = CreateWindowW(L"edit", str2, WS_CHILD | WS_VISIBLE | SS_CENTER, 730, 250, 50, 20, hwnd, NULL, NULL, NULL);
+    HWND hwnd_saveSrcDest = CreateWindowW(L"button", L"Save", WS_CHILD | WS_VISIBLE | SS_CENTER, 550, 280, 150, 20, hwnd, SAVE_SRC_DEST, NULL, NULL);
     //Roads info
     hwnd_listView = CreateWindowW(WC_LISTVIEW, NULL, WS_VISIBLE | WS_CHILD | LVS_REPORT | LVS_SORTASCENDING | LVS_SHOWSELALWAYS, 70, 350, 400, 200, hwnd, NULL, NULL, NULL);
     InitListViewColumns(hwnd_listView);

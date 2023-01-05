@@ -11,4 +11,6 @@ void changeRoadCapacity(road* rd, int capacity);
 node* getSetupData();
 node* getNode(int nodeId);
 void setSourceNode(int nodeId);
+int getSrcNode();
 void setDestNode(int nodeId);
+int getDestNode();
