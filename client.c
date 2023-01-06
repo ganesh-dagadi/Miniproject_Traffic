@@ -84,17 +84,82 @@ HWND hwnd_outputWin;
 HWND hwnd_srcEdit;
 HWND hwnd_destEdit;
 road* roadVect[MAX_ROADS];
+int arr[NUM_VEHICLES][MAX_ROADS];
+
+//window2
+HWND hwnd_VehiclesLB;
+HWND hwnd_pathLB;
 
 void createWindowControls(HWND hwnd);
 
+void fillVehiclesLB(HWND hwnd) {
+    wchar_t strInt[3];
+    HWND hwnd_SelectVehicleL = CreateWindowW(L"Static", L"Select a vehicle", WS_VISIBLE | WS_CHILD, 20, 10, 150, 30, hwnd, NULL, NULL, NULL);
+    hwnd_VehiclesLB = CreateWindowW(L"ListBox", NULL, WS_VISIBLE | WS_CHILD | LBS_STANDARD | LBS_NOTIFY, 20, 50, 400, 200, hwnd, (HMENU)SELECT_VEHICLE, NULL, NULL);
+    for (int i = 0; i < MAX_JUNCS; i++) {
+        tostring(strInt, i);
+        // MessageBox(NULL, )
+        SendMessageW(hwnd_VehiclesLB, LB_ADDSTRING, NULL, (LPARAM)strInt);
+    }
+}
+
 LRESULT CALLBACK outputProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    
     switch (msg)
     {
     case WM_CREATE:
     {
+        
+        SfindPaths(&arr);
+        int arr2 = 3;
+        fillVehiclesLB(hwnd);
+        //displaying output
+        wchar_t str[5];
+        
+        refreshSetup();
     }
     break;
-    
+    case WM_COMMAND:
+    {
+        int wmId = LOWORD(wParam);
+        switch (wmId) {
+        case SELECT_VEHICLE:
+        {
+            switch (HIWORD(wParam)) {
+                case LBN_SELCHANGE:
+                {
+                    int count = SendMessage(hwnd_VehiclesLB, LB_GETCOUNT, 0, 0);
+                    int iSelected = -1;
+
+                    for (int i = 0; i < count; i++)
+                    {
+
+                        if (SendMessage(hwnd_VehiclesLB, LB_GETSEL, i, 0) > 0)
+                        {
+
+                            iSelected = i;
+                            break;
+                        }
+
+                    }
+
+                    int outputArr[MAX_ROADS];
+                    for (int i = 0; i < MAX_ROADS; i++) {
+                        outputArr[i] = -1;
+                    }
+                    for (int i = 0; i < MAX_ROADS; i++) {
+                        outputArr[i] = arr[iSelected][i];
+                    }
+
+                    
+                }
+                break;
+            }
+        }
+        break;
+        }
+    }
+    break;
     case WM_CLOSE:
         DestroyWindow(hwnd);
         break;
