@@ -83,12 +83,14 @@ WNDCLASSEX outputWindow;
 HWND hwnd_outputWin;
 HWND hwnd_srcEdit;
 HWND hwnd_destEdit;
+HWND hwnd_showPathLB;
 road* roadVect[MAX_ROADS];
 int arr[NUM_VEHICLES][MAX_ROADS];
 
 //window2
 HWND hwnd_VehiclesLB;
 HWND hwnd_pathLB;
+HWND hwnd_OutputLB;
 
 void createWindowControls(HWND hwnd);
 
@@ -100,6 +102,19 @@ void fillVehiclesLB(HWND hwnd) {
         tostring(strInt, i);
         // MessageBox(NULL, )
         SendMessageW(hwnd_VehiclesLB, LB_ADDSTRING, NULL, (LPARAM)strInt);
+    }
+}
+
+void fillPathLB(HWND hwnd, int arr[]) {
+    wchar_t strInt[3];
+    HWND hwnd_OutputL = CreateWindowW(L"Static", L"Path taken by vehicle is :", WS_VISIBLE | WS_CHILD, 20, 300, 150, 30, hwnd, NULL, NULL, NULL);
+    hwnd_OutputLB = CreateWindowW(L"ListBox", NULL, WS_VISIBLE | WS_CHILD | LBS_STANDARD | LBS_NOTIFY, 20, 350, 400, 200, hwnd, NULL, NULL, NULL);
+    SendMessageW(hwnd_OutputLB, LB_ADDSTRING, NULL, L"End");
+    for (int i = 0; i < MAX_JUNCS; i++) {
+        if (arr[i] == -1) break;
+        tostring(strInt, arr[i]);
+        // MessageBox(NULL, )
+        SendMessageW(hwnd_OutputLB, LB_ADDSTRING, NULL, (LPARAM)strInt);
     }
 }
 
@@ -115,7 +130,6 @@ LRESULT CALLBACK outputProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         fillVehiclesLB(hwnd);
         //displaying output
         wchar_t str[5];
-        
         refreshSetup();
     }
     break;
@@ -150,7 +164,7 @@ LRESULT CALLBACK outputProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
                     for (int i = 0; i < MAX_ROADS; i++) {
                         outputArr[i] = arr[iSelected][i];
                     }
-
+                    fillPathLB(hwnd, outputArr);
                     
                 }
                 break;
